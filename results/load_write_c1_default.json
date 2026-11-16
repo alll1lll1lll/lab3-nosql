@@ -1,0 +1,1 @@
+{"kind":"write","ops":20000,"concurrency":1,"consistency":"LOCAL_QUORUM","durationSec":128.54,"throughputOpsPerSec":155.6,"write":{"total":20000,"ok":20000,"failed":0,"successRate":100.0,"avgMs":6.34,"p50Ms":5.88,"p95Ms":8.87,"p99Ms":12.17,"maxMs":1957.87}}

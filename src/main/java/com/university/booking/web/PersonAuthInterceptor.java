@@ -1,6 +1,6 @@
 package com.university.booking.web;
 
-import com.university.booking.service.PersonLookupService;
+import com.university.booking.service.person.PersonLookupService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

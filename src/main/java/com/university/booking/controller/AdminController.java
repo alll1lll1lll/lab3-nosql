@@ -1,11 +1,11 @@
 package com.university.booking.controller;
 
 import com.university.booking.config.MongoSchemaInitializer;
-import com.university.booking.dto.ExplainComparison;
-import com.university.booking.dto.MigrationResult;
+import com.university.booking.dto.admin.ExplainComparison;
+import com.university.booking.dto.admin.MigrationResult;
 import com.university.booking.enums.BookingStatus;
-import com.university.booking.service.DemoDataService;
-import com.university.booking.service.ExplainService;
+import com.university.booking.service.admin.DemoDataService;
+import com.university.booking.service.admin.ExplainService;
 import com.university.booking.web.AdminOnly;
 import java.util.List;
 import java.util.Map;

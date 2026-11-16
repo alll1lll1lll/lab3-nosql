@@ -1,11 +1,13 @@
 package com.university.booking.exception;
 
-import com.university.booking.dto.ErrorResponse;
+import com.datastax.oss.driver.api.core.DriverException;
+import com.mongodb.MongoException;
+import com.university.booking.dto.common.ErrorResponse;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletionException;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import com.mongodb.MongoException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -81,6 +83,19 @@ public class GlobalExceptionHandler {
             }
         }
         return false;
+    }
+
+    @ExceptionHandler({DriverException.class, CompletionException.class})
+    public ResponseEntity<ErrorResponse> handleCassandra(RuntimeException ex) {
+        Throwable cause = ex instanceof CompletionException && ex.getCause() != null ? ex.getCause() : ex;
+        if (!(cause instanceof DriverException driver)) {
+            return handleUnexpected(ex);
+        }
+        log.atWarn()
+                .addKeyValue("exception", driver.getClass().getSimpleName())
+                .log("cassandra request failed: {}", driver.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(build(HttpStatus.SERVICE_UNAVAILABLE.value(),
+                "Cassandra: " + driver.getClass().getSimpleName() + ": " + driver.getMessage()));
     }
 
     @ExceptionHandler(ResponseStatusException.class)

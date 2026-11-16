@@ -1,8 +1,8 @@
 package com.university.booking.config;
 
-import com.university.booking.dto.MigrationResult;
-import com.university.booking.service.MigrationService;
-import com.university.booking.service.OrganizationService;
+import com.university.booking.dto.admin.MigrationResult;
+import com.university.booking.service.admin.MigrationService;
+import com.university.booking.service.organization.OrganizationService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;

@@ -1,8 +1,8 @@
 package com.university.booking.controller;
 
-import com.university.booking.dto.CategoryRequest;
+import com.university.booking.dto.category.CategoryRequest;
 import com.university.booking.model.Category;
-import com.university.booking.service.CategoryService;
+import com.university.booking.service.category.CategoryService;
 import com.university.booking.web.AdminOnly;
 import jakarta.validation.Valid;
 import java.util.List;

@@ -1,15 +1,13 @@
 package com.university.booking.controller;
 
-import com.university.booking.dto.BookingRequest;
+import com.university.booking.dto.booking.BookingRequest;
 import com.university.booking.model.Booking;
 import com.university.booking.model.Cart;
-import com.university.booking.service.CartService;
+import com.university.booking.service.cart.CartService;
 import com.university.booking.web.PersonAuthInterceptor;
-
 import jakarta.validation.Valid;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/cart")

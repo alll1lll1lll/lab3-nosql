@@ -1,7 +1,7 @@
 package com.university.booking.controller;
 
-import com.university.booking.dto.OrganizationStatsReport;
-import com.university.booking.service.AnalyticsService;
+import com.university.booking.dto.organization.OrganizationStatsReport;
+import com.university.booking.service.analytics.AnalyticsService;
 import com.university.booking.web.AdminOnly;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;

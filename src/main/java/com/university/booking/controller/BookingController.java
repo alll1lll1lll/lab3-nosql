@@ -1,14 +1,14 @@
 package com.university.booking.controller;
 
-import com.university.booking.dto.BookingRequest;
-import com.university.booking.dto.BookingSearchParams;
-import com.university.booking.dto.CommentRequest;
-import com.university.booking.dto.PageResponse;
-import com.university.booking.dto.ProcessBookingRequest;
+import com.university.booking.dto.booking.BookingRequest;
+import com.university.booking.dto.booking.BookingSearchParams;
+import com.university.booking.dto.booking.CommentRequest;
+import com.university.booking.dto.booking.ProcessBookingRequest;
+import com.university.booking.dto.common.PageResponse;
 import com.university.booking.model.Booking;
-import com.university.booking.service.BookingSearchService;
-import com.university.booking.service.BookingService;
-import com.university.booking.service.PersonNameService;
+import com.university.booking.service.booking.BookingSearchService;
+import com.university.booking.service.booking.BookingService;
+import com.university.booking.service.person.PersonNameService;
 import com.university.booking.web.AdminOnly;
 import com.university.booking.web.PersonAuthInterceptor;
 import jakarta.validation.Valid;

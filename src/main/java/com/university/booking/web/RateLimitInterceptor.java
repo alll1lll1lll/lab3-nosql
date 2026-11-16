@@ -1,21 +1,17 @@
 package com.university.booking.web;
 
 import com.university.booking.enums.RedisKeyPrefix;
-import com.university.booking.service.RateLimiterService;
-
+import com.university.booking.service.security.RateLimiterService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import java.time.Duration;
 
 @Component
 @RequiredArgsConstructor

@@ -1,6 +1,6 @@
 package com.university.booking.model;
 
-import com.university.booking.dto.BookingRequest;
+import com.university.booking.dto.booking.BookingRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

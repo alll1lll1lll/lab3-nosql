@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum RedisKeyPrefix {
     CART("cart:"),
     RATE_LIMIT_PERSON("rate:limit:person:"),
-    RATE_LIMIT_IP("rate:limit:ip:");
+    RATE_LIMIT_IP("rate:limit:ip:"),
+    EVENT_SEQUENCE("events:seq:");
 
     private final String prefix;
 

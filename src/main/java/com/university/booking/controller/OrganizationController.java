@@ -1,8 +1,8 @@
 package com.university.booking.controller;
 
-import com.university.booking.dto.OrganizationRequest;
+import com.university.booking.dto.organization.OrganizationRequest;
 import com.university.booking.model.Organization;
-import com.university.booking.service.OrganizationService;
+import com.university.booking.service.organization.OrganizationService;
 import com.university.booking.web.AdminOnly;
 import jakarta.validation.Valid;
 import java.util.List;

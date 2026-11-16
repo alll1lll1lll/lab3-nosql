@@ -1,6 +1,6 @@
 package com.university.booking.web;
 
-import com.university.booking.service.AccessService;
+import com.university.booking.service.security.AccessService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

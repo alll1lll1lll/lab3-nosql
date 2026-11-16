@@ -1,7 +1,6 @@
 package com.university.booking.web;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -18,7 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
 
         registry.addInterceptor(personAuthInterceptor).addPathPatterns("/api/**");
-        registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/**");
+        registry.addInterceptor(rateLimitInterceptor).addPathPatterns("/api/**")
+                .excludePathPatterns("/api/admin/cassandra/**");
         registry.addInterceptor(adminOnlyInterceptor).addPathPatterns("/api/**");
     }
 }

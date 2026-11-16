@@ -1,9 +1,9 @@
 package com.university.booking.controller;
 
-import com.university.booking.dto.RoomRequest;
-import com.university.booking.dto.RoomScheduleResponse;
+import com.university.booking.dto.room.RoomRequest;
+import com.university.booking.dto.room.RoomScheduleResponse;
 import com.university.booking.model.Room;
-import com.university.booking.service.RoomService;
+import com.university.booking.service.room.RoomService;
 import com.university.booking.web.AdminOnly;
 import jakarta.validation.Valid;
 import java.time.LocalDate;

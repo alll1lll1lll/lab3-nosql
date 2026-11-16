@@ -2,6 +2,9 @@ spring:
   application:
     name: university-booking
 
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.cassandra.CassandraAutoConfiguration
+
   jackson:
     serialization:
       write-dates-as-timestamps: false
@@ -31,12 +34,22 @@ app:
     requests-per-minute: 60
   analytics:
     cache-ttl-seconds: 60
+  cassandra:
+    contact-points: 127.0.0.1:9042,127.0.0.1:9043,127.0.0.1:9044
+    local-datacenter: dc1
+    keyspace: booking_events
+    replication-factor: 3
+    consistency: LOCAL_QUORUM
+    request-timeout: 5s
+    bucket-size: 100000
+    reconnect-interval: 10s
 
 logging:
   level:
     com.university.booking: DEBUG
     org.springframework.data.redis: DEBUG
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
+    com.datastax.oss.driver: INFO
   structured:
     format:
       console: logstash

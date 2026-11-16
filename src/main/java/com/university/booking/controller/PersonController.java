@@ -1,8 +1,8 @@
 package com.university.booking.controller;
 
-import com.university.booking.dto.PersonRequest;
+import com.university.booking.dto.person.PersonRequest;
 import com.university.booking.model.Person;
-import com.university.booking.service.PersonService;
+import com.university.booking.service.person.PersonService;
 import com.university.booking.web.AdminOnly;
 import com.university.booking.web.PersonAuthInterceptor;
 import jakarta.validation.Valid;
