@@ -1,4 +1,4 @@
 Frequency of writes by partition:
    Table                         Partition            Count +/-
-   booking_events.events_by_type HOT_PARTITION_DEMO:0 40001 0  
+   booking_events.events_by_type HOT_PARTITION_DEMO:0 34281 0  
 

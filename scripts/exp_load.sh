@@ -13,9 +13,10 @@ for path in sys.argv[1:]:
             s = d[op]
             rows.append((d["kind"], d["consistency"], d["concurrency"], op, d["throughputOpsPerSec"],
                          s["avgMs"], s["p95Ms"], s["p99Ms"], s["successRate"]))
+fmt = lambda value: "—" if value is None else f"{value:.2f}"
 print("%-6s %-12s %5s %-5s %10s %8s %8s %8s %6s" % ("kind", "CL", "conc", "op", "ops/s", "avg,ms", "p95,ms", "p99,ms", "ok%"))
 for r in rows:
-    print("%-6s %-12s %5d %-5s %10.0f %8.2f %8.2f %8.2f %6.1f" % r)
+    print("%-6s %-12s %5d %-5s %10.0f %8s %8s %8s %6.1f" % (*r[:5], *(fmt(v) for v in r[5:8]), r[8]))
 ' "$@"
 }
 

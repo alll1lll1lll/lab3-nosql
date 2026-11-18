@@ -1,31 +1,31 @@
 --- cassandra-1
 		Table: events_by_type
-		Space used (live): 0
-		Number of partitions (estimate): 0
-		Local write count: 0
-		Compacted partition maximum bytes: 0
-		Table: events_by_type_unbucketed
-		Space used (live): 9957062
+		Space used (live): 3305713
 		Number of partitions (estimate): 1
-		Local write count: 300000
-		Compacted partition maximum bytes: 89970660
---- cassandra-2
-		Table: events_by_type
-		Space used (live): 9952711
-		Number of partitions (estimate): 3
-		Local write count: 300000
+		Local write count: 100000
 		Compacted partition maximum bytes: 30130992
 		Table: events_by_type_unbucketed
 		Space used (live): 0
 		Number of partitions (estimate): 0
 		Local write count: 0
 		Compacted partition maximum bytes: 0
---- cassandra-3
+--- cassandra-2
 		Table: events_by_type
 		Space used (live): 0
 		Number of partitions (estimate): 0
 		Local write count: 0
 		Compacted partition maximum bytes: 0
+		Table: events_by_type_unbucketed
+		Space used (live): 9889122
+		Number of partitions (estimate): 1
+		Local write count: 300000
+		Compacted partition maximum bytes: 89970660
+--- cassandra-3
+		Table: events_by_type
+		Space used (live): 6589796
+		Number of partitions (estimate): 2
+		Local write count: 200000
+		Compacted partition maximum bytes: 30130992
 		Table: events_by_type_unbucketed
 		Space used (live): 0
 		Number of partitions (estimate): 0

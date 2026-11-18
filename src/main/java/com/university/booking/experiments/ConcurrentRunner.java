@@ -33,12 +33,12 @@ final class ConcurrentRunner {
                 if (error == null) {
                     op.series().ok(System.nanoTime() - started);
                 } else {
-                    op.series().fail(error);
+                    op.series().fail(error, System.nanoTime() - started);
                 }
                 permits.release();
             });
         } catch (RuntimeException e) {
-            op.series().fail(e);
+            op.series().fail(e, System.nanoTime() - started);
             permits.release();
         }
     }

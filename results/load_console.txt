@@ -3,25 +3,25 @@
 
 ========== основной профиль: LOCAL_QUORUM, 64 запроса в полёте ==========
 kind   CL            conc op         ops/s   avg,ms   p95,ms   p99,ms    ok%
-write  LOCAL_QUORUM    64 write       1535    41.15    87.70   140.16  100.0
-read   LOCAL_QUORUM    64 read        1552    40.87    78.15   126.36  100.0
-mixed  LOCAL_QUORUM    64 write       1683    43.86    73.95   128.07  100.0
-mixed  LOCAL_QUORUM    64 read        1683    31.54    57.06    95.15  100.0
+write  LOCAL_QUORUM    64 write       3482    17.65    26.44   220.09  100.0
+read   LOCAL_QUORUM    64 read        3109    20.25    38.65    52.64  100.0
+mixed  LOCAL_QUORUM    64 write       4016    16.61    33.78    59.05  100.0
+mixed  LOCAL_QUORUM    64 read        4016    14.33    30.46    50.65  100.0
 
 ========== зависимость от параллелизма (запись) ==========
 kind   CL            conc op         ops/s   avg,ms   p95,ms   p99,ms    ok%
-write  LOCAL_QUORUM     1 write        156     6.34     8.87    12.17  100.0
-write  LOCAL_QUORUM     8 write        677    11.70    19.90    31.98  100.0
-write  LOCAL_QUORUM    32 write       1019    31.08    54.32    83.36  100.0
-write  LOCAL_QUORUM   128 write       1241    77.83   131.92   464.47   99.6
-write  LOCAL_QUORUM   256 write       2472    99.99   170.98   252.33  100.0
+write  LOCAL_QUORUM     1 write        247     3.99     6.45     9.59  100.0
+write  LOCAL_QUORUM     8 write       1398     5.36     9.94    19.20  100.0
+write  LOCAL_QUORUM    32 write       3349     9.06    18.49    33.38  100.0
+write  LOCAL_QUORUM   128 write       6155    19.81    36.33   183.38  100.0
+write  LOCAL_QUORUM   256 write       7913    30.57    64.92   182.21  100.0
 
 ========== уровень согласованности под нагрузкой (смешанная, 64) ==========
 kind   CL            conc op         ops/s   avg,ms   p95,ms   p99,ms    ok%
-mixed  ONE             64 write       1883    46.83    94.47   171.83  100.0
-mixed  ONE             64 read        1883    19.98    43.36    78.19  100.0
-mixed  LOCAL_QUORUM    64 write       1680    44.95    79.64   127.46  100.0
-mixed  LOCAL_QUORUM    64 read        1680    30.57    57.26    91.31  100.0
-mixed  ALL             64 write       1465    52.25    88.47   109.70  100.0
-mixed  ALL             64 read        1465    34.39    62.35    85.86  100.0
-сводка: /c/Users/uzbek/Desktop/lab3-nosql/scripts/../results/load_summary.txt
+mixed  ONE             64 write       4942    14.40    30.79    48.73  100.0
+mixed  ONE             64 read        4942     9.37    23.03    42.96  100.0
+mixed  LOCAL_QUORUM    64 write       5163    13.19    27.13    38.48  100.0
+mixed  LOCAL_QUORUM    64 read        5163    10.50    22.40    32.57  100.0
+mixed  ALL             64 write       4540    15.54    27.03    39.98  100.0
+mixed  ALL             64 read        4540    11.87    21.81    33.57  100.0
+сводка: /d/ITMO/5sem/nosql/lab3/lab3-nosql/scripts/../results/load_summary.txt

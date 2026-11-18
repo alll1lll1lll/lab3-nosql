@@ -1,0 +1,315 @@
+
+========== сброс данных прошлого запуска ==========
+{"droppedKeyspace":"hot_partition_lab","deletedBuckets":0}
+
+========== запись 300000 событий + сэмплирование горячих партиций (toppartitions, 30 с) ==========
+{
+    "events": 300000,
+    "seqRange": [
+        1,
+        300000
+    ],
+    "buckets": [
+        0,
+        2
+    ],
+    "durationSec": 287.55,
+    "writesPerSec": 4173.24,
+    "booking_events.events_by_type": {
+        "total": 300000,
+        "ok": 299350,
+        "failed": 650,
+        "successRate": 99.78,
+        "avgMs": 30.28,
+        "p50Ms": 11.94,
+        "p95Ms": 34.63,
+        "p99Ms": 55.34,
+        "maxMs": 151377.03,
+        "errors": {
+            "DriverTimeoutException": 1,
+            "WriteTimeoutException": 649
+        },
+        "errorSamples": {
+            "DriverTimeoutException": "Query timed out after PT5S",
+            "WriteTimeoutException": "Cassandra timeout during SIMPLE write query at consistency LOCAL_QUORUM (2 replica were required but only 1 acknowledged the write)"
+        }
+    },
+    "booking_events.events_by_type_unbucketed": {
+        "total": 300000,
+        "ok": 299324,
+        "failed": 676,
+        "successRate": 99.77,
+        "avgMs": 31.83,
+        "p50Ms": 11.97,
+        "p95Ms": 34.64,
+        "p99Ms": 55.5,
+        "maxMs": 151377.15,
+        "errors": {
+            "WriteTimeoutException": 676
+        },
+        "errorSamples": {
+            "WriteTimeoutException": "Cassandra timeout during SIMPLE write query at consistency LOCAL_QUORUM (2 replica were required but only 1 acknowledged the write)"
+        }
+    },
+    "hot_partition_lab.events_by_type": {
+        "total": 300000,
+        "ok": 300000,
+        "failed": 0,
+        "successRate": 100.0,
+        "avgMs": 34.15,
+        "p50Ms": 6.42,
+        "p95Ms": 22.72,
+        "p99Ms": 40.8,
+        "maxMs": 151376.98
+    },
+    "hot_partition_lab.events_by_type_unbucketed": {
+        "total": 300000,
+        "ok": 300000,
+        "failed": 0,
+        "successRate": 100.0,
+        "avgMs": 15.85,
+        "p50Ms": 5.72,
+        "p95Ms": 22.7,
+        "p99Ms": 47.31,
+        "maxMs": 151353.08
+    }
+}
+--- toppartitions, без бакета:
+Frequency of writes by partition:
+   Table                                    Partition          Count +/-
+   booking_events.events_by_type_unbucketed HOT_PARTITION_DEMO 39972 0  
+
+--- toppartitions, с бакетом:
+Frequency of writes by partition:
+   Table                         Partition            Count +/-
+   booking_events.events_by_type HOT_PARTITION_DEMO:0 40001 0  
+
+
+========== flush memtable -> sstable, чтобы появились гистограммы размеров партиций ==========
+
+========== размеры партиций (nodetool tablehistograms, cassandra-1) ==========
+### booking_events.events_by_type (с бакетом)
+booking_events/events_by_type histograms
+Percentile      Read Latency     Write Latency          SSTables    Partition Size        Cell Count
+                    (micros)          (micros)                             (bytes)                  
+50%                   258.00             20.00              0.00              1331                20
+75%                   310.00             42.00              0.00           7007506            152321
+95%                   446.00            103.00              0.00          30130992            654949
+98%                   535.00            215.00              0.00          30130992            654949
+99%                   535.00            372.00              0.00          30130992            654949
+Min                    73.00              2.00              0.00               216                 6
+Max                   535.00         454826.00              0.00          30130992            654949
+
+### booking_events.events_by_type_unbucketed
+booking_events/events_by_type_unbucketed histograms
+Percentile      Read Latency     Write Latency          SSTables    Partition Size        Cell Count
+                    (micros)          (micros)                             (bytes)                  
+50%                     0.00             20.00              0.00           5839588            126934
+75%                     0.00             42.00              0.00          89970660           1955666
+95%                     0.00            103.00              0.00          89970660           1955666
+98%                     0.00            215.00              0.00          89970660           1955666
+99%                     0.00            372.00              0.00          89970660           1955666
+Min                     0.00              2.00              0.00           4866324            105779
+Max                     0.00         454826.00              0.00          89970660           1955666
+
+
+========== максимальная партиция (nodetool tablestats) ==========
+		Table: events_by_type
+		Space used (live): 10207361
+		Number of partitions (estimate): 12
+		Compacted partition minimum bytes: 216
+		Compacted partition maximum bytes: 30130992
+		Compacted partition mean bytes: 6713060
+		Table: events_by_type_unbucketed
+		Space used (live): 9966843
+		Number of partitions (estimate): 1
+		Compacted partition minimum bytes: 4866324
+		Compacted partition maximum bytes: 89970660
+		Compacted partition mean bytes: 47905124
+
+========== RF=1: на каком узле лежат данные (write count / partitions по узлам) ==========
+--- cassandra-1
+		Table: events_by_type
+		Space used (live): 0
+		Number of partitions (estimate): 0
+		Local write count: 0
+		Compacted partition maximum bytes: 0
+		Table: events_by_type_unbucketed
+		Space used (live): 9957062
+		Number of partitions (estimate): 1
+		Local write count: 300000
+		Compacted partition maximum bytes: 89970660
+--- cassandra-2
+		Table: events_by_type
+		Space used (live): 9952711
+		Number of partitions (estimate): 3
+		Local write count: 300000
+		Compacted partition maximum bytes: 30130992
+		Table: events_by_type_unbucketed
+		Space used (live): 0
+		Number of partitions (estimate): 0
+		Local write count: 0
+		Compacted partition maximum bytes: 0
+--- cassandra-3
+		Table: events_by_type
+		Space used (live): 0
+		Number of partitions (estimate): 0
+		Local write count: 0
+		Compacted partition maximum bytes: 0
+		Table: events_by_type_unbucketed
+		Space used (live): 0
+		Number of partitions (estimate): 0
+		Local write count: 0
+		Compacted partition maximum bytes: 0
+
+========== предупреждения Cassandra о крупных партициях (guardrail partition_size_warn_threshold = 10MiB) ==========
+[cassandra-1] WARN  [CompactionExecutor:5] 2026-11-08T08:03:23,006 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type:HOT_PARTITION_DEMO:1 on sstable /var/lib/cassandra/data/booking_events/events_by_type-d72c14a0db4611f18588b7f13eb0bd8d/nb-17-big-Data.db has size 29289042, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-1] WARN  [CompactionExecutor:6] 2026-11-08T08:03:26,675 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type_unbucketed:HOT_PARTITION_DEMO on sstable /var/lib/cassandra/data/booking_events/events_by_type_unbucketed-db60bda0db4611f18588b7f13eb0bd8d/nb-17-big-Data.db has size 82255034, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-1] WARN  [CompactionExecutor:5] 2026-11-08T08:03:28,965 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition hot_partition_lab.events_by_type_unbucketed:HOT_PARTITION_DEMO on sstable /var/lib/cassandra/data/hot_partition_lab/events_by_type_unbucketed-3544f310db4a11f1baf97958f6c51cba/nb-17-big-Data.db has size 84354816, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-2] WARN  [CompactionExecutor:2] 2026-11-08T08:03:29,765 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type_unbucketed:HOT_PARTITION_DEMO on sstable /var/lib/cassandra/data/booking_events/events_by_type_unbucketed-db60bda0db4611f18588b7f13eb0bd8d/nb-13-big-Data.db has size 83873016, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-2] WARN  [CompactionExecutor:1] 2026-11-08T08:03:30,023 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type:HOT_PARTITION_DEMO:2 on sstable /var/lib/cassandra/data/booking_events/events_by_type-d72c14a0db4611f18588b7f13eb0bd8d/nb-21-big-Data.db has size 28482049, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-2] WARN  [CompactionExecutor:1] 2026-11-08T08:03:30,439 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type:HOT_PARTITION_DEMO:1 on sstable /var/lib/cassandra/data/booking_events/events_by_type-d72c14a0db4611f18588b7f13eb0bd8d/nb-21-big-Data.db has size 29289042, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-3] WARN  [PerDiskMemtableFlushWriter_0:2] 2026-11-08T08:03:15,835 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type_unbucketed:HOT_PARTITION_DEMO on sstable /var/lib/cassandra/data/booking_events/events_by_type_unbucketed-db60bda0db4611f18588b7f13eb0bd8d/nb-8-big-Data.db has size 10728321, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-3] WARN  [CompactionExecutor:2] 2026-11-08T08:03:19,133 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type_unbucketed:HOT_PARTITION_DEMO on sstable /var/lib/cassandra/data/booking_events/events_by_type_unbucketed-db60bda0db4611f18588b7f13eb0bd8d/nb-9-big-Data.db has size 77486766, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+[cassandra-3] WARN  [PerDiskMemtableFlushWriter_0:1] 2026-11-08T08:03:22,901 NoSpamLogger.java:107 - Guardrail partition_size violated: Partition booking_events.events_by_type:HOT_PARTITION_DEMO:2 on sstable /var/lib/cassandra/data/booking_events/events_by_type-d72c14a0db4611f18588b7f13eb0bd8d/nb-18-big-Data.db has size 10642098, this exceeds the warning threshold of 10485760. Too large partitions can cause performance problems.
+
+========== отчёт приложения: строки по партициям, реплики, задержка чтения ==========
+{
+    "bucketSize": 100000,
+    "bucketed": [
+        {
+            "partition": "(HOT_PARTITION_DEMO, 0)",
+            "rows": 100000,
+            "countMs": 1689.86,
+            "replicasRf3": [
+                "cassandra-1(rack1)",
+                "cassandra-2(rack2)",
+                "cassandra-3(rack3)"
+            ],
+            "ownerRf1": [
+                "cassandra-2(rack2)"
+            ]
+        },
+        {
+            "partition": "(HOT_PARTITION_DEMO, 1)",
+            "rows": 100000,
+            "countMs": 1468.33,
+            "replicasRf3": [
+                "cassandra-1(rack1)",
+                "cassandra-2(rack2)",
+                "cassandra-3(rack3)"
+            ],
+            "ownerRf1": [
+                "cassandra-2(rack2)"
+            ]
+        },
+        {
+            "partition": "(HOT_PARTITION_DEMO, 2)",
+            "rows": 100000,
+            "countMs": 2063.6,
+            "replicasRf3": [
+                "cassandra-1(rack1)",
+                "cassandra-2(rack2)",
+                "cassandra-3(rack3)"
+            ],
+            "ownerRf1": [
+                "cassandra-2(rack2)"
+            ]
+        }
+    ],
+    "unbucketed": {
+        "partition": "(HOT_PARTITION_DEMO)",
+        "rows": 300000,
+        "countMs": 2635.85,
+        "replicasRf3": [
+            "cassandra-1(rack1)",
+            "cassandra-2(rack2)",
+            "cassandra-3(rack3)"
+        ],
+        "ownerRf1": [
+            "cassandra-1(rack1)"
+        ]
+    },
+    "rf1RowsPerNode": {
+        "unbucketed": {
+            "cassandra-1(rack1)": 300000
+        },
+        "bucketed": {
+            "cassandra-2(rack2)": 300000
+        }
+    },
+    "readLatencyMs_CL_ONE": {
+        "newest100": {
+            "unbucketed": {
+                "total": 30,
+                "ok": 30,
+                "failed": 0,
+                "successRate": 100.0,
+                "avgMs": 6.85,
+                "p50Ms": 6.16,
+                "p95Ms": 11.39,
+                "p99Ms": 14.35,
+                "maxMs": 14.35
+            },
+            "bucketed": {
+                "total": 30,
+                "ok": 30,
+                "failed": 0,
+                "successRate": 100.0,
+                "avgMs": 8.55,
+                "p50Ms": 5.98,
+                "p95Ms": 20.51,
+                "p99Ms": 63.4,
+                "maxMs": 63.4
+            }
+        },
+        "oldest100": {
+            "unbucketed": {
+                "total": 30,
+                "ok": 30,
+                "failed": 0,
+                "successRate": 100.0,
+                "avgMs": 8.2,
+                "p50Ms": 7.99,
+                "p95Ms": 9.97,
+                "p99Ms": 13.28,
+                "maxMs": 13.28
+            },
+            "bucketed": {
+                "total": 30,
+                "ok": 30,
+                "failed": 0,
+                "successRate": 100.0,
+                "avgMs": 10.31,
+                "p50Ms": 8.46,
+                "p95Ms": 15.77,
+                "p99Ms": 26.47,
+                "maxMs": 26.47
+            }
+        },
+        "window100FromMiddle": {
+            "unbucketed": {
+                "total": 30,
+                "ok": 30,
+                "failed": 0,
+                "successRate": 100.0,
+                "avgMs": 6.81,
+                "p50Ms": 7.02,
+                "p95Ms": 7.85,
+                "p99Ms": 7.99,
+                "maxMs": 7.99
+            },
+            "bucketed": {
+                "total": 30,
+                "ok": 30,
+                "failed": 0,
+                "successRate": 100.0,
+                "avgMs": 7.41,
+                "p50Ms": 6.96,
+                "p95Ms": 10.03,
+                "p99Ms": 11.8,
+                "maxMs": 11.8
+            }
+        }
+    }
+}

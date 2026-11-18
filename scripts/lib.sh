@@ -60,11 +60,12 @@ d = json.load(sys.stdin)
 if "levels" not in d:
     print(json.dumps(d, ensure_ascii=False)); sys.exit()
 print("  узлы:", ", ".join(d.get("upNodes", [])))
-print("  %-7s %-5s %8s %8s %8s %8s  %s" % ("CL", "op", "ok%", "avg,ms", "p95,ms", "max,ms", "ошибки"))
+fmt = lambda value: "—" if value is None else f"{value:.2f}"
+print("  %-7s %-5s %8s %8s %8s %8s %10s %10s  %s" % ("CL", "op", "ok%", "avg,ms", "p95,ms", "max,ms", "errAvg,ms", "errP95,ms", "ошибки"))
 for cl, v in d["levels"].items():
     for op in ("write", "read"):
         s = v[op]
-        print("  %-7s %-5s %8.1f %8.2f %8.2f %8.2f  %s" % (cl, op, s["successRate"], s["avgMs"], s["p95Ms"],
-              s["maxMs"], s.get("errors", "")))
+        print("  %-7s %-5s %8.1f %8s %8s %8s %10s %10s  %s" % (cl, op, s["successRate"], fmt(s["avgMs"]), fmt(s["p95Ms"]),
+              fmt(s["maxMs"]), fmt(s.get("failureAvgMs")), fmt(s.get("failureP95Ms")), s.get("errors", "")))
 '
 }

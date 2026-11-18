@@ -42,8 +42,9 @@ public class CategoryService {
 
     @CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(String id) {
-        categoryRepository.findById(id).ifPresent(c -> events.record(EventDraft.of(EventType.CATEGORY_DELETED, id,
-                EventPayload.of("name", c.getName()))));
+        var deleted = categoryRepository.findById(id);
         categoryRepository.deleteById(id);
+        deleted.ifPresent(c -> events.record(EventDraft.of(EventType.CATEGORY_DELETED, id,
+                EventPayload.of("name", c.getName()))));
     }
 }

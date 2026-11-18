@@ -1,0 +1,24 @@
+### booking_events.events_by_type (с бакетом)
+booking_events/events_by_type histograms
+Percentile      Read Latency     Write Latency          SSTables    Partition Size        Cell Count
+                    (micros)          (micros)                             (bytes)                  
+50%                   258.00             20.00              0.00              1331                20
+75%                   310.00             42.00              0.00           7007506            152321
+95%                   446.00            103.00              0.00          30130992            654949
+98%                   535.00            215.00              0.00          30130992            654949
+99%                   535.00            372.00              0.00          30130992            654949
+Min                    73.00              2.00              0.00               216                 6
+Max                   535.00         454826.00              0.00          30130992            654949
+
+### booking_events.events_by_type_unbucketed
+booking_events/events_by_type_unbucketed histograms
+Percentile      Read Latency     Write Latency          SSTables    Partition Size        Cell Count
+                    (micros)          (micros)                             (bytes)                  
+50%                     0.00             20.00              0.00           5839588            126934
+75%                     0.00             42.00              0.00          89970660           1955666
+95%                     0.00            103.00              0.00          89970660           1955666
+98%                     0.00            215.00              0.00          89970660           1955666
+99%                     0.00            372.00              0.00          89970660           1955666
+Min                     0.00              2.00              0.00           4866324            105779
+Max                     0.00         454826.00              0.00          89970660           1955666
+

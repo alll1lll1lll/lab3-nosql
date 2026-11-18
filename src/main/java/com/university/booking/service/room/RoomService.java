@@ -67,8 +67,9 @@ public class RoomService {
 
     @CacheEvict(value = "rooms", allEntries = true)
     public void deleteRoom(String id) {
-        roomRepository.findById(id).ifPresent(room -> events.record(EventDraft.of(EventType.ROOM_DELETED, id,
-                EventPayload.of("name", room.getName(), "location", room.getLocation()))));
+        var deleted = roomRepository.findById(id);
         roomRepository.deleteById(id);
+        deleted.ifPresent(room -> events.record(EventDraft.of(EventType.ROOM_DELETED, id,
+                EventPayload.of("name", room.getName(), "location", room.getLocation()))));
     }
 }

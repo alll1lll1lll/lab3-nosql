@@ -61,9 +61,10 @@ public class PersonService {
 
     @CacheEvict(cacheNames = PersonLookupService.CACHE_NAME, key = "#p0")
     public void deletePerson(String id) {
-        personRepository.findById(id).ifPresent(p -> events.record(EventDraft.of(EventType.PERSON_DELETED, id,
-                EventPayload.of("role", p.getRole()))));
+        var deleted = personRepository.findById(id);
         personRepository.deleteById(id);
+        deleted.ifPresent(p -> events.record(EventDraft.of(EventType.PERSON_DELETED, id,
+                EventPayload.of("role", p.getRole()))));
     }
 
     private String generateUniqueId() {

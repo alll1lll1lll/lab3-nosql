@@ -1,0 +1,35 @@
+
+========== A. все узлы UP ==========
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=UP, cassandra-3(rack3)=UP
+  CL      op         ok%   avg,ms   p95,ms   max,ms  errAvg,ms  errP95,ms  ошибки
+  ONE     write    100.0     8.31    10.56   113.48          —          —  
+  ONE     read     100.0     4.84     6.92    10.92          —          —  
+  ALL     write    100.0     9.06    12.18    18.30          —          —  
+  ALL     read     100.0     6.94     9.74    16.19          —          —  
+
+========== B. cassandra-3 ограничен 0.3 CPU ==========
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=UP, cassandra-3(rack3)=UP
+  CL      op         ok%   avg,ms   p95,ms   max,ms  errAvg,ms  errP95,ms  ошибки
+  ONE     write    100.0    39.34    92.77   187.37          —          —  
+  ONE     read     100.0    11.23    43.03   100.38          —          —  
+  ALL     write    100.0    42.55    88.44   202.76          —          —  
+  ALL     read     100.0    27.67    96.45   188.09          —          —  
+
+========== C. cassandra-3 заморожен (docker pause) ==========
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=UP, cassandra-3(rack3)=DOWN
+  CL      op         ok%   avg,ms   p95,ms   max,ms  errAvg,ms  errP95,ms  ошибки
+  ONE     write     99.3     6.22     9.28    19.78    4014.11    4018.23  {'WriteTimeoutException': 2}
+  ONE     read     100.0     4.11     7.34    18.42          —          —  
+  ALL     write      0.0        —        —        —      43.95      10.18  {'DriverTimeoutException': 1, 'UnavailableException': 298, 'WriteTimeoutException': 1}
+  ALL     read       0.0        —        —        —      53.33       8.44  {'DriverTimeoutException': 1, 'HeartbeatException': 1, 'ReadTimeoutException': 1, 'UnavailableException': 297}
+
+========== D. cassandra-3 остановлен ==========
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=UP, cassandra-3(rack3)=DOWN
+  CL      op         ok%   avg,ms   p95,ms   max,ms  errAvg,ms  errP95,ms  ошибки
+  ONE     write    100.0     5.55     7.54    10.85          —          —  
+  ONE     read     100.0     3.57     5.02    15.65          —          —  
+  ALL     write      0.0        —        —        —       6.85      10.04  {'UnavailableException': 300}
+  ALL     read       0.0        —        —        —       4.99       8.04  {'UnavailableException': 300}
+
+========== восстановление ==========
+результаты: /d/ITMO/5sem/nosql/lab3/lab3-nosql/scripts/../results/consistency_*.json

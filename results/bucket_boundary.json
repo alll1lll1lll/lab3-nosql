@@ -1,0 +1,26 @@
+{
+  "boundary": "2026-11-18T07:09:03.838000+00:00",
+  "period": {
+    "type": "HOT_PARTITION_DEMO",
+    "from": "2026-11-18T07:09:03.828000+00:00",
+    "to": "2026-11-18T07:09:03.848000+00:00",
+    "size": 500,
+    "consistency": "QUORUM"
+  },
+  "buckets": [
+    1,
+    2
+  ],
+  "checks": [
+    {
+      "order": "asc",
+      "events": 82,
+      "passed": true
+    },
+    {
+      "order": "desc",
+      "events": 82,
+      "passed": true
+    }
+  ]
+}

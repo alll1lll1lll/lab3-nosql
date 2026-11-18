@@ -1,0 +1,12 @@
+		Table: events_by_type
+		Space used (live): 10207361
+		Number of partitions (estimate): 12
+		Compacted partition minimum bytes: 216
+		Compacted partition maximum bytes: 30130992
+		Compacted partition mean bytes: 6713060
+		Table: events_by_type_unbucketed
+		Space used (live): 9966843
+		Number of partitions (estimate): 1
+		Compacted partition minimum bytes: 4866324
+		Compacted partition maximum bytes: 89970660
+		Compacted partition mean bytes: 47905124

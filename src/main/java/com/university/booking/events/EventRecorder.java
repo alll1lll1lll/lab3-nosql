@@ -37,6 +37,8 @@ public class EventRecorder {
     private final ObjectMapper objectMapper;
 
     private final BlockingQueue<StoredEvent> pending = new LinkedBlockingQueue<>(MAX_PENDING);
+    private record Deferred(EventDraft draft, String actor) {}
+    private final BlockingQueue<Deferred> deferred = new LinkedBlockingQueue<>(MAX_PENDING);
     private final AtomicLong written = new AtomicLong();
     private final AtomicLong failedAttempts = new AtomicLong();
     private final AtomicLong dropped = new AtomicLong();
@@ -63,11 +65,14 @@ public class EventRecorder {
     }
 
     public EventWriterStats stats() {
-        return new EventWriterStats(written.get(), pending.size(), failedAttempts.get(), dropped.get());
+        return new EventWriterStats(written.get(), pending.size() + deferred.size(), failedAttempts.get(), dropped.get());
     }
 
     @Scheduled(fixedDelay = RETRY_INTERVAL_SECONDS, timeUnit = TimeUnit.SECONDS)
     public void retryPending() {
+        List<Deferred> drafts = new ArrayList<>();
+        deferred.drainTo(drafts, RETRY_BATCH_SIZE);
+        drafts.forEach(d -> submit(d.draft(), d.actor()));
         if (pending.isEmpty() || !cassandra.isConnected()) {
             return;
         }
@@ -82,7 +87,11 @@ public class EventRecorder {
         try {
             event = prepare(draft.type(), draft.entityId(), actor, draft.summary(), toJson(draft.payload()));
         } catch (RuntimeException e) {
-            log.atError().addKeyValue("event", "event_prepare_failed").setCause(e).log("cannot prepare event");
+            failedAttempts.incrementAndGet();
+            if (!deferred.offer(new Deferred(draft, actor))) {
+                dropped.incrementAndGet();
+                log.error("Deferred event queue is full, event dropped", e);
+            }
             return;
         }
         if (cassandra.isConnected()) {

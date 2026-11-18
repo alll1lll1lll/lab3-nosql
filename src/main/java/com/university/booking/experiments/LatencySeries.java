@@ -13,6 +13,7 @@ final class LatencySeries {
     private final long[] nanos;
     private final Map<String, Integer> errors = new HashMap<>();
     private final Map<String, String> errorSamples = new HashMap<>();
+    private final java.util.List<Long> failedNanos = new java.util.ArrayList<>();
     private int okCount;
     private int total;
 
@@ -27,7 +28,8 @@ final class LatencySeries {
         total++;
     }
 
-    synchronized void fail(Throwable error) {
+    synchronized void fail(Throwable error, long elapsedNanos) {
+        failedNanos.add(elapsedNanos);
         Throwable cause = error instanceof CompletionException && error.getCause() != null ? error.getCause() : error;
         String name = cause.getClass().getSimpleName();
         errors.merge(name, 1, Integer::sum);
@@ -45,15 +47,25 @@ final class LatencySeries {
         double avgNanos = Arrays.stream(sorted).average().orElse(0);
         return new LatencyStats(total, okCount, total - okCount,
                 Timings.round(total == 0 ? 0 : 100.0 * okCount / total),
-                Timings.toMillis(Math.round(avgNanos)),
+                okCount == 0 ? null : Timings.toMillis(Math.round(avgNanos)),
                 percentile(sorted, 50), percentile(sorted, 95), percentile(sorted, 99),
-                okCount == 0 ? 0 : Timings.toMillis(sorted[okCount - 1]),
+                okCount == 0 ? null : Timings.toMillis(sorted[okCount - 1]),
+                failureAverage(), failureP95(),
                 new TreeMap<>(errors), new TreeMap<>(errorSamples));
     }
 
-    private static double percentile(long[] sorted, int p) {
+    private Double failureAverage() {
+        return failedNanos.isEmpty() ? null : Timings.toMillis(Math.round(
+                failedNanos.stream().mapToLong(Long::longValue).average().orElseThrow()));
+    }
+
+    private Double failureP95() {
+        return percentile(failedNanos.stream().mapToLong(Long::longValue).sorted().toArray(), 95);
+    }
+
+    private static Double percentile(long[] sorted, int p) {
         if (sorted.length == 0) {
-            return 0;
+            return null;
         }
         int rank = (int) Math.ceil(p / 100.0 * sorted.length);
         return Timings.toMillis(sorted[Math.max(0, rank - 1)]);

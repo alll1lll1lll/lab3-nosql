@@ -207,7 +207,7 @@ public class HotPartitionExperimentService {
                 s.execute(st);
                 series.ok(System.nanoTime() - started);
             } catch (RuntimeException e) {
-                series.fail(e);
+                series.fail(e, System.nanoTime() - started);
             }
         }
         return series.stats();

@@ -1,1 +1,1 @@
-{"kind":"read","ops":20000,"concurrency":64,"consistency":"LOCAL_QUORUM","durationSec":12.88,"throughputOpsPerSec":1552.47,"read":{"total":20000,"ok":20000,"failed":0,"successRate":100.0,"avgMs":40.87,"p50Ms":36.33,"p95Ms":78.15,"p99Ms":126.36,"maxMs":241.99}}
+{"kind":"read","ops":20000,"concurrency":64,"consistency":"LOCAL_QUORUM","durationSec":6.43,"throughputOpsPerSec":3109.03,"read":{"total":20000,"ok":20000,"failed":0,"successRate":100.0,"avgMs":20.25,"p50Ms":18.26,"p95Ms":38.65,"p99Ms":52.64,"maxMs":146.16,"failureAvgMs":null,"failureP95Ms":null}}

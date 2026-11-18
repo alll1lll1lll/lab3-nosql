@@ -1,0 +1,50 @@
+{
+  "clusterName": "booking-cluster",
+  "nodes": [
+    {
+      "node": "cassandra-2(rack2)",
+      "endpoint": "/127.0.0.1:9043",
+      "broadcast": "/172.30.0.12:7000",
+      "datacenter": "dc1",
+      "rack": "rack2",
+      "state": "UP",
+      "openConnections": 1,
+      "version": "5.0.9",
+      "hostId": "8fa00539-185e-42c4-894e-2d61495eb821"
+    },
+    {
+      "node": "cassandra-1(rack1)",
+      "endpoint": "/127.0.0.1:9042",
+      "broadcast": "/172.30.0.11:7000",
+      "datacenter": "dc1",
+      "rack": "rack1",
+      "state": "UP",
+      "openConnections": 2,
+      "version": "5.0.9",
+      "hostId": "6798a35c-846d-4d9e-9cba-ee6ec59720f8"
+    },
+    {
+      "node": "cassandra-3(rack3)",
+      "endpoint": "/127.0.0.1:9044",
+      "broadcast": "/172.30.0.13:7000",
+      "datacenter": "dc1",
+      "rack": "rack3",
+      "state": "UP",
+      "openConnections": 1,
+      "version": "5.0.9",
+      "hostId": "0d1b1e21-31de-4188-b700-5d8d473915e7"
+    }
+  ],
+  "replication": {
+    "class": "org.apache.cassandra.locator.NetworkTopologyStrategy",
+    "dc1": "3"
+  },
+  "defaultConsistency": "LOCAL_QUORUM",
+  "bucketSize": 100000,
+  "eventWriter": {
+    "written": 15,
+    "pendingRetry": 0,
+    "failedAttempts": 18,
+    "dropped": 0
+  }
+}

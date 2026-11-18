@@ -1,0 +1,69 @@
+
+========== A. 3 узла UP ==========
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=UP, cassandra-3(rack3)=UP
+  CL      op         ok%   avg,ms   p95,ms   max,ms  ошибки
+  ONE     write    100.0     9.71    17.76    50.43  
+  ONE     read     100.0     5.32    10.05    17.22  
+  QUORUM  write    100.0     9.99    17.66    18.89  
+  QUORUM  read     100.0     6.42     9.08    10.42  
+  ALL     write    100.0    10.32    16.70    19.41  
+  ALL     read     100.0     8.11    11.03    29.93  
+
+========== B. остановлен cassandra-3 ==========
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=UP, cassandra-3(rack3)=DOWN
+  CL      op         ok%   avg,ms   p95,ms   max,ms  ошибки
+  ONE     write    100.0     6.10    10.63    21.12  
+  ONE     read     100.0     3.86     7.04    13.63  
+  QUORUM  write    100.0     7.24    11.28    14.13  
+  QUORUM  read     100.0     5.32     7.93    12.92  
+  ALL     write      0.0     0.00     0.00     0.00  {'UnavailableException': 50}
+  ALL     read       0.0     0.00     0.00     0.00  {'UnavailableException': 50}
+
+========== C. остановлен ещё cassandra-2 -> кворум потерян ==========
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=DOWN, cassandra-3(rack3)=DOWN
+  CL      op         ok%   avg,ms   p95,ms   max,ms  ошибки
+  ONE     write      0.0     0.00     0.00     0.00  {'AllNodesFailedException': 50}
+  ONE     read     100.0     1.61     2.33     4.10  
+  QUORUM  write      0.0     0.00     0.00     0.00  {'AllNodesFailedException': 50}
+  QUORUM  read       0.0     0.00     0.00     0.00  {'AllNodesFailedException': 50}
+  ALL     write      0.0     0.00     0.00     0.00  {'AllNodesFailedException': 50}
+  ALL     read       0.0     0.00     0.00     0.00  {'AllNodesFailedException': 50}
+  -- то же одиночной вставкой (без LOGGED batch: batchlog требует ещё 2 живых узла с CL TWO)
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=DOWN, cassandra-3(rack3)=DOWN
+  CL      op         ok%   avg,ms   p95,ms   max,ms  ошибки
+  ONE     write    100.0     1.62     2.69     3.55  
+  ONE     read     100.0     1.83     2.56     3.39  
+  QUORUM  write      0.0     0.00     0.00     0.00  {'AllNodesFailedException': 50}
+  QUORUM  read       0.0     0.00     0.00     0.00  {'AllNodesFailedException': 50}
+  CRUD: создание организаций в MongoDB -> HTTP 201 201 201
+  eventWriter: {'written': 9, 'dropped': 0, 'pendingRetry': 3, 'failedAttempts': 76}
+  Q1 с LOCAL_QUORUM (по умолчанию) -> HTTP 503
+  Q1 с ONE                         -> HTTP 200, наших событий: 0 из 3
+  hints на cassandra-1 для лежащих узлов:
+    -rw-r--r-- 1 cassandra cassandra   167 Nov  8 07:56 /opt/cassandra/data/hints/15c5b82b-561a-4827-9725-af8ff572137c-1794124592533-2.hints
+    -rw-r--r-- 1 cassandra cassandra 48299 Nov  8 07:57 /opt/cassandra/data/hints/15c5b82b-561a-4827-9725-af8ff572137c-1794124641751-2.hints
+    -rw-r--r-- 1 cassandra cassandra 12392 Nov  8 07:57 /opt/cassandra/data/hints/4aa8b4ac-af78-4a80-8721-222ed52ceb01-1794124651752-2.hints
+    host id узлов:
+      172.30.0.13  15c5b82b-561a-4827-9725-af8ff572137c  rack3
+      172.30.0.12  4aa8b4ac-af78-4a80-8721-222ed52ceb01  rack2
+      172.30.0.11  5b743417-e612-4b18-a1eb-082b2b9e56c5  rack1
+
+========== D. узлы возвращаются ==========
+  ждём повторную отправку очереди и доставку hints...
+  eventWriter: {'written': 12, 'dropped': 0, 'pendingRetry': 0, 'failedAttempts': 88}
+  Q1 с QUORUM -> HTTP 200, наших событий: 3 из 3
+  hints после восстановления (доставлены и удалены):
+    Ñ�айлов hints неÑ�
+    host id узлов:
+      172.30.0.13  15c5b82b-561a-4827-9725-af8ff572137c  rack3
+      172.30.0.12  4aa8b4ac-af78-4a80-8721-222ed52ceb01  rack2
+      172.30.0.11  5b743417-e612-4b18-a1eb-082b2b9e56c5  rack1
+  узлы: cassandra-1(rack1)=UP, cassandra-2(rack2)=UP, cassandra-3(rack3)=UP
+  CL      op         ok%   avg,ms   p95,ms   max,ms  ошибки
+  ONE     write    100.0     8.23    11.99    39.46  
+  ONE     read     100.0     4.67     9.30    14.65  
+  QUORUM  write    100.0     9.04    13.28    17.21  
+  QUORUM  read     100.0     6.43     9.85    30.74  
+  ALL     write    100.0     9.21    13.85    15.93  
+  ALL     read     100.0     7.03     9.33    13.52  
+результаты: /c/Users/uzbek/Desktop/lab3-nosql/scripts/../results/quorum_*.json

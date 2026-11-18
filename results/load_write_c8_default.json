@@ -1,1 +1,1 @@
-{"kind":"write","ops":20000,"concurrency":8,"consistency":"LOCAL_QUORUM","durationSec":29.55,"throughputOpsPerSec":676.89,"write":{"total":20000,"ok":20000,"failed":0,"successRate":100.0,"avgMs":11.7,"p50Ms":10.56,"p95Ms":19.9,"p99Ms":31.98,"maxMs":131.35}}
+{"kind":"write","ops":20000,"concurrency":8,"consistency":"LOCAL_QUORUM","durationSec":14.31,"throughputOpsPerSec":1397.55,"write":{"total":20000,"ok":20000,"failed":0,"successRate":100.0,"avgMs":5.36,"p50Ms":4.26,"p95Ms":9.94,"p99Ms":19.2,"maxMs":186.21,"failureAvgMs":null,"failureP95Ms":null}}

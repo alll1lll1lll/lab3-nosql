@@ -89,59 +89,43 @@ public class EventStore {
     public EventPage queryStream(EventStream stream, String key, EventQuery query) {
         long started = System.nanoTime();
         int limit = Math.clamp(query.size(), 1, MAX_PAGE_SIZE);
-        List<Integer> candidates = overlappingBuckets(buckets(stream.key(key), query.consistency()),
-                query.from(), query.to());
-        if (!query.ascending()) {
-            candidates = candidates.reversed();
-        }
 
-        PageCursor cursor = PageCursor.decode(query.pageToken());
-        int index = 0;
-        if (cursor != null) {
-            index = candidates.indexOf(cursor.bucket());
-            if (index < 0) {
-                throw new ValidationException("pageToken не относится к этому запросу");
-            }
-        }
-
+        List<Integer> candidates = buckets(stream.key(key), query.consistency()).stream()
+                .map(BucketInfo::bucket).toList();
+        StreamCursor cursor = StreamCursor.decode(query.pageToken());
         CassandraConnector.Connection c = cassandra.require();
         PreparedStatement ps = streamStatement(c.statements(), stream, query.ascending());
         boolean byType = stream == EventStream.TYPE;
-        List<EventView> items = new ArrayList<>(limit);
-        List<Integer> scanned = new ArrayList<>();
-        String next = null;
+        List<EventView> collected = new ArrayList<>();
         String coordinator = null;
-        ByteBuffer pagingState = cursor != null ? cursor.pagingState() : null;
-
-        while (index < candidates.size()) {
-            int bucket = candidates.get(index);
-            BoundStatement stmt = ps.bind(key, bucket, query.from(), query.to())
-                    .setPageSize(limit - items.size())
-                    .setPagingState(pagingState);
+        Instant from = query.from();
+        Instant to = query.to();
+        if (cursor != null) {
+            if (query.ascending() && cursor.at().isAfter(from)) from = cursor.at();
+            if (!query.ascending() && cursor.at().isBefore(to)) to = cursor.at();
+        }
+        for (int bucket : candidates) {
+            BoundStatement stmt = ps.bind(key, bucket, from, to).setPageSize(limit + 1);
             AsyncResultSet rs = execute(c, withConsistency(stmt, query.consistency()));
-            coordinator = coordinator(rs);
-            scanned.add(bucket);
-            for (Row row : rs.currentPage()) {
-                items.add(toView(row, byType ? bucket : null, byType));
-            }
-            if (rs.hasMorePages()) {
-                pagingState = rs.getExecutionInfo().getPagingState();
-                if (items.size() >= limit) {
-                    next = new PageCursor(bucket, pagingState).encode();
-                    break;
+            int accepted = 0;
+            while (true) {
+                coordinator = coordinator(rs);
+                for (Row row : rs.currentPage()) {
+                    EventView event = toView(row, byType ? bucket : null, byType);
+                    if (cursor == null || cursor.isAfter(event, query.ascending())) {
+                        collected.add(event);
+                        if (++accepted == limit + 1) break;
+                    }
                 }
-                continue;
-            }
-            pagingState = null;
-            index++;
-            if (items.size() >= limit) {
-                if (index < candidates.size()) {
-                    next = new PageCursor(candidates.get(index), null).encode();
-                }
-                break;
+                if (accepted == limit + 1 || !rs.hasMorePages()) break;
+                rs = rs.fetchNextPage().toCompletableFuture().join();
             }
         }
-        return new EventPage(items, items.size(), next, scanned, effective(query.consistency()), coordinator,
+        List<EventView> items = StreamCursor.page(collected, query.ascending(), limit + 1);
+        boolean more = items.size() > limit;
+        if (more) items = new ArrayList<>(items.subList(0, limit));
+        String next = more ? StreamCursor.of(items.getLast()).encode() : null;
+        return new EventPage(items, items.size(), next, candidates, effective(query.consistency()), coordinator,
                 Timings.millisSince(started));
     }
 
@@ -162,20 +146,6 @@ public class EventStore {
         String next = rs.hasMorePages() ? new PageCursor(0, rs.getExecutionInfo().getPagingState()).encode() : null;
         return new EventPage(items, items.size(), next, null, effective(query.consistency()), coordinator(rs),
                 Timings.millisSince(started));
-    }
-
-    static List<Integer> overlappingBuckets(List<BucketInfo> buckets, Instant from, Instant to) {
-        List<Integer> result = new ArrayList<>();
-        for (int i = 0; i < buckets.size(); i++) {
-            BucketInfo b = buckets.get(i);
-            Instant nextStart = i + 1 < buckets.size() ? buckets.get(i + 1).firstEventAt() : null;
-            boolean startsBeforeEnd = !b.firstEventAt().isAfter(to);
-            boolean endsAfterStart = nextStart == null || !nextStart.isBefore(from);
-            if (startsBeforeEnd && endsAfterStart) {
-                result.add(b.bucket());
-            }
-        }
-        return result;
     }
 
     private static PreparedStatement streamStatement(CassandraStatements st, EventStream stream, boolean ascending) {

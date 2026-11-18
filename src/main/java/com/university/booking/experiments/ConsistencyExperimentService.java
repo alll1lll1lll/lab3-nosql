@@ -89,7 +89,7 @@ public class ConsistencyExperimentService {
                     readYourWrites++;
                 }
             } catch (RuntimeException ex) {
-                reads.fail(ex);
+                reads.fail(ex, System.nanoTime() - started);
             }
         }
 
@@ -100,7 +100,7 @@ public class ConsistencyExperimentService {
                 writes.ok(System.nanoTime() - started);
                 return true;
             } catch (RuntimeException ex) {
-                writes.fail(ex);
+                writes.fail(ex, System.nanoTime() - started);
                 return false;
             }
         }
