@@ -8,6 +8,7 @@ import com.university.booking.events.EventType;
 import com.university.booking.model.Category;
 import com.university.booking.repository.CategoryRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -42,7 +43,7 @@ public class CategoryService {
 
     @CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(String id) {
-        var deleted = categoryRepository.findById(id);
+        Optional<Category> deleted = categoryRepository.findById(id);
         categoryRepository.deleteById(id);
         deleted.ifPresent(c -> events.record(EventDraft.of(EventType.CATEGORY_DELETED, id,
                 EventPayload.of("name", c.getName()))));

@@ -9,17 +9,22 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
-/** Keyset cursor shared by all bucket prefixes in a stream. */
 record StreamCursor(Instant at, UUID id) {
+
     static StreamCursor of(EventView event) {
         return new StreamCursor(event.occurredAt().toInstant(), event.eventId());
     }
 
     private static int compare(StreamCursor a, StreamCursor b) {
         int time = a.at.compareTo(b.at);
-        if (time != 0) return time;
+        if (time != 0) {
+            return time;
+        }
         int uuidTime = Long.compare(a.id.timestamp(), b.id.timestamp());
-        return uuidTime != 0 ? uuidTime : Long.compareUnsigned(a.id.getLeastSignificantBits(), b.id.getLeastSignificantBits());
+        if (uuidTime != 0) {
+            return uuidTime;
+        }
+        return Long.compareUnsigned(a.id.getLeastSignificantBits(), b.id.getLeastSignificantBits());
     }
 
     boolean isAfter(EventView event, boolean ascending) {
@@ -38,11 +43,18 @@ record StreamCursor(Instant at, UUID id) {
     }
 
     static StreamCursor decode(String token) {
-        if (token == null || token.isBlank()) return null;
+        if (token == null || token.isBlank()) {
+            return null;
+        }
         try {
             String[] parts = new String(Base64.getUrlDecoder().decode(token), StandardCharsets.UTF_8).split("/");
+            if (parts.length != 2) {
+                throw new IllegalArgumentException();
+            }
             UUID id = UUID.fromString(parts[1]);
-            if (parts.length != 2 || id.version() != 1) throw new IllegalArgumentException();
+            if (id.version() != 1) {
+                throw new IllegalArgumentException();
+            }
             return new StreamCursor(Instant.ofEpochMilli(Long.parseLong(parts[0])), id);
         } catch (RuntimeException e) {
             throw new ValidationException("Некорректный pageToken");

@@ -1,14 +1,19 @@
 package com.university.booking.experiments;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+import com.university.booking.dto.cassandra.LatencyStats;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
 class LatencySeriesTest {
-    @Test void errorsHaveSeparateLatencyAndNoSuccessfulMeasurements() {
+
+    @Test
+    void errorsHaveSeparateLatencyAndNoSuccessfulMeasurements() {
         LatencySeries series = new LatencySeries(2);
         series.fail(new IllegalStateException("unavailable"), 10_000_000);
         series.fail(new IllegalStateException("timeout"), 30_000_000);
-        var stats = series.stats();
+        LatencyStats stats = series.stats();
         assertNull(stats.avgMs());
         assertNull(stats.p95Ms());
         assertEquals(20.0, stats.failureAvgMs());

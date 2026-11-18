@@ -1,5 +1,13 @@
 package com.university.booking.events;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.university.booking.cassandra.CassandraConnector;
 import com.university.booking.config.CassandraProperties;
@@ -11,11 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 class BucketBoundaryTest {
-    @Test void boundaryAndUnavailableCounter() {
+
+    @Test
+    void boundaryAndUnavailableCounter() {
         CassandraConnector connector = mock(CassandraConnector.class);
         CassandraProperties properties = mock(CassandraProperties.class);
         when(connector.properties()).thenReturn(properties);
@@ -35,7 +43,8 @@ class BucketBoundaryTest {
                 "TEST", "BOOKING", "1", "actor", "test", null, bucket, null);
     }
 
-    @Test void overlappingBucketsAndEqualTimestampsPaginateInBothDirections() {
+    @Test
+    void overlappingBucketsAndEqualTimestampsPaginateInBothDirections() {
         List<EventView> input = List.of(event(0, 3000), event(1, 1000), event(1, 3000), event(0, 2000));
         for (boolean ascending : List.of(true, false)) {
             List<EventView> expected = StreamCursor.page(input, ascending, 100);

@@ -12,6 +12,7 @@ import com.university.booking.model.Person;
 import com.university.booking.repository.PersonRepository;
 import com.university.booking.service.security.AccessService;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -61,7 +62,7 @@ public class PersonService {
 
     @CacheEvict(cacheNames = PersonLookupService.CACHE_NAME, key = "#p0")
     public void deletePerson(String id) {
-        var deleted = personRepository.findById(id);
+        Optional<Person> deleted = personRepository.findById(id);
         personRepository.deleteById(id);
         deleted.ifPresent(p -> events.record(EventDraft.of(EventType.PERSON_DELETED, id,
                 EventPayload.of("role", p.getRole()))));

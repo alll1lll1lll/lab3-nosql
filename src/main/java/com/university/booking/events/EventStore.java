@@ -16,9 +16,7 @@ import com.university.booking.cassandra.CassandraConnector;
 import com.university.booking.cassandra.CassandraStatements;
 import com.university.booking.dto.event.EventPage;
 import com.university.booking.dto.event.EventView;
-import com.university.booking.exception.ValidationException;
 import com.university.booking.util.Timings;
-import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -89,7 +87,6 @@ public class EventStore {
     public EventPage queryStream(EventStream stream, String key, EventQuery query) {
         long started = System.nanoTime();
         int limit = Math.clamp(query.size(), 1, MAX_PAGE_SIZE);
-
         List<Integer> candidates = buckets(stream.key(key), query.consistency()).stream()
                 .map(BucketInfo::bucket).toList();
         StreamCursor cursor = StreamCursor.decode(query.pageToken());
@@ -100,9 +97,11 @@ public class EventStore {
         String coordinator = null;
         Instant from = query.from();
         Instant to = query.to();
-        if (cursor != null) {
-            if (query.ascending() && cursor.at().isAfter(from)) from = cursor.at();
-            if (!query.ascending() && cursor.at().isBefore(to)) to = cursor.at();
+        if (cursor != null && query.ascending() && cursor.at().isAfter(from)) {
+            from = cursor.at();
+        }
+        if (cursor != null && !query.ascending() && cursor.at().isBefore(to)) {
+            to = cursor.at();
         }
         for (int bucket : candidates) {
             BoundStatement stmt = ps.bind(key, bucket, from, to).setPageSize(limit + 1);
@@ -114,16 +113,22 @@ public class EventStore {
                     EventView event = toView(row, byType ? bucket : null, byType);
                     if (cursor == null || cursor.isAfter(event, query.ascending())) {
                         collected.add(event);
-                        if (++accepted == limit + 1) break;
+                        if (++accepted == limit + 1) {
+                            break;
+                        }
                     }
                 }
-                if (accepted == limit + 1 || !rs.hasMorePages()) break;
+                if (accepted == limit + 1 || !rs.hasMorePages()) {
+                    break;
+                }
                 rs = rs.fetchNextPage().toCompletableFuture().join();
             }
         }
         List<EventView> items = StreamCursor.page(collected, query.ascending(), limit + 1);
         boolean more = items.size() > limit;
-        if (more) items = new ArrayList<>(items.subList(0, limit));
+        if (more) {
+            items = new ArrayList<>(items.subList(0, limit));
+        }
         String next = more ? StreamCursor.of(items.getLast()).encode() : null;
         return new EventPage(items, items.size(), next, candidates, effective(query.consistency()), coordinator,
                 Timings.millisSince(started));

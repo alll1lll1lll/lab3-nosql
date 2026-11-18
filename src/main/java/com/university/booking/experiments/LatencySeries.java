@@ -2,8 +2,10 @@ package com.university.booking.experiments;
 
 import com.university.booking.dto.cassandra.LatencyStats;
 import com.university.booking.util.Timings;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletionException;
@@ -13,7 +15,7 @@ final class LatencySeries {
     private final long[] nanos;
     private final Map<String, Integer> errors = new HashMap<>();
     private final Map<String, String> errorSamples = new HashMap<>();
-    private final java.util.List<Long> failedNanos = new java.util.ArrayList<>();
+    private final List<Long> failedNanos = new ArrayList<>();
     private int okCount;
     private int total;
 
@@ -55,8 +57,10 @@ final class LatencySeries {
     }
 
     private Double failureAverage() {
-        return failedNanos.isEmpty() ? null : Timings.toMillis(Math.round(
-                failedNanos.stream().mapToLong(Long::longValue).average().orElseThrow()));
+        if (failedNanos.isEmpty()) {
+            return null;
+        }
+        return Timings.toMillis(Math.round(failedNanos.stream().mapToLong(Long::longValue).average().orElseThrow()));
     }
 
     private Double failureP95() {

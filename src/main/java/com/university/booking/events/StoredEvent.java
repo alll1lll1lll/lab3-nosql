@@ -18,7 +18,11 @@ public record StoredEvent(
 
     public static StoredEvent create(EventType type, String entityId, String actorId, String summary, String payload,
                                      BucketAllocation typeBucket, BucketAllocation actorBucket) {
-        UUID id = Uuids.timeBased();
+        return create(Uuids.timeBased(), type, entityId, actorId, summary, payload, typeBucket, actorBucket);
+    }
+
+    public static StoredEvent create(UUID id, EventType type, String entityId, String actorId, String summary,
+                                     String payload, BucketAllocation typeBucket, BucketAllocation actorBucket) {
         Instant at = Instant.ofEpochMilli(Uuids.unixTimestamp(id));
         return new StoredEvent(id, at, type.name(), type.getEntityType().name(), entityId, actorId, summary, payload,
                 typeBucket, actorBucket);

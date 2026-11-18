@@ -13,6 +13,7 @@ import com.university.booking.repository.BookingRepository;
 import com.university.booking.repository.RoomRepository;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -67,7 +68,7 @@ public class RoomService {
 
     @CacheEvict(value = "rooms", allEntries = true)
     public void deleteRoom(String id) {
-        var deleted = roomRepository.findById(id);
+        Optional<Room> deleted = roomRepository.findById(id);
         roomRepository.deleteById(id);
         deleted.ifPresent(room -> events.record(EventDraft.of(EventType.ROOM_DELETED, id,
                 EventPayload.of("name", room.getName(), "location", room.getLocation()))));

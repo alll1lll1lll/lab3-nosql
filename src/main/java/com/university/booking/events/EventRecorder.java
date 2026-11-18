@@ -1,5 +1,6 @@
 package com.university.booking.events;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.university.booking.cassandra.CassandraConnector;
@@ -8,6 +9,7 @@ import com.university.booking.web.PersonAuthInterceptor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +39,6 @@ public class EventRecorder {
     private final ObjectMapper objectMapper;
 
     private final BlockingQueue<StoredEvent> pending = new LinkedBlockingQueue<>(MAX_PENDING);
-    private record Deferred(EventDraft draft, String actor) {}
     private final BlockingQueue<Deferred> deferred = new LinkedBlockingQueue<>(MAX_PENDING);
     private final AtomicLong written = new AtomicLong();
     private final AtomicLong failedAttempts = new AtomicLong();
@@ -49,17 +50,22 @@ public class EventRecorder {
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                 @Override
                 public void afterCommit() {
-                    submit(draft, actor);
+                    submit(new Deferred(Uuids.timeBased(), draft, actor));
                 }
             });
         } else {
-            submit(draft, actor);
+            submit(new Deferred(Uuids.timeBased(), draft, actor));
         }
     }
 
     public StoredEvent prepare(EventType type, String entityId, String actor, String summary, String payloadJson) {
+        return prepare(Uuids.timeBased(), type, entityId, actor, summary, payloadJson);
+    }
+
+    private StoredEvent prepare(UUID eventId, EventType type, String entityId, String actor, String summary,
+                                String payloadJson) {
         String actorId = actor != null ? actor : SYSTEM_ACTOR;
-        return StoredEvent.create(type, entityId, actorId, summary, payloadJson,
+        return StoredEvent.create(eventId, type, entityId, actorId, summary, payloadJson,
                 buckets.allocate(EventStream.TYPE.key(type.name())),
                 buckets.allocate(EventStream.ACTOR.key(actorId)));
     }
@@ -72,7 +78,7 @@ public class EventRecorder {
     public void retryPending() {
         List<Deferred> drafts = new ArrayList<>();
         deferred.drainTo(drafts, RETRY_BATCH_SIZE);
-        drafts.forEach(d -> submit(d.draft(), d.actor()));
+        drafts.forEach(this::submit);
         if (pending.isEmpty() || !cassandra.isConnected()) {
             return;
         }
@@ -82,15 +88,18 @@ public class EventRecorder {
         batch.forEach(this::send);
     }
 
-    private void submit(EventDraft draft, String actor) {
+    private void submit(Deferred item) {
+        EventDraft draft = item.draft();
         StoredEvent event;
         try {
-            event = prepare(draft.type(), draft.entityId(), actor, draft.summary(), toJson(draft.payload()));
+            event = prepare(item.eventId(), draft.type(), draft.entityId(), item.actor(), draft.summary(),
+                    toJson(draft.payload()));
         } catch (RuntimeException e) {
             failedAttempts.incrementAndGet();
-            if (!deferred.offer(new Deferred(draft, actor))) {
+            if (!deferred.offer(item)) {
                 dropped.incrementAndGet();
-                log.error("Deferred event queue is full, event dropped", e);
+                log.atError().addKeyValue("event", "event_dropped").setCause(e)
+                        .log("deferred queue is full, event dropped");
             }
             return;
         }
@@ -149,5 +158,8 @@ public class EventRecorder {
         }
         Object id = attrs.getAttribute(PersonAuthInterceptor.PERSON_ID_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
         return id != null ? id.toString() : null;
+    }
+
+    private record Deferred(UUID eventId, EventDraft draft, String actor) {
     }
 }
